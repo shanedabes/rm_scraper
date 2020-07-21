@@ -8,11 +8,20 @@ import (
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/hekmon/transmissionrpc"
+	"github.com/jessevdk/go-flags"
 )
 
 var (
 	NoMagnetFoundErr = errors.New("no magnet link found")
 )
+
+type Options struct {
+	Host     string `short:"H" long:"host" description:"Transmission server address" env:"RMS_HOST" default:"localhost"`
+	Port     uint16 `short:"P" long:"port" description:"Transmission server port" env:"RMS_PORT" default:"9091"`
+	Secure   bool   `short:"s" long:"secure" description:"Connect to transmission using tls" env:"RMS_SECURE"`
+	User     string `short:"u" long:"user" description:"Transmission server user" env:"RMS_USER" required:"true"`
+	Password string `short:"p" long:"password" description:"Transmission server password" env:"RMS_PASSWORD" required:"true"`
+}
 
 func getMagnet(doc *goquery.Document) (string, error) {
 	href, found := doc.Find(".magnet").Attr("href")
@@ -25,6 +34,13 @@ func getMagnet(doc *goquery.Document) (string, error) {
 }
 
 func main() {
+	opts := Options{}
+	_, err := flags.Parse(&opts)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	res, err := http.Get("https://myrunningman.com/")
 	if err != nil {
 		log.Fatal(err)
@@ -47,7 +63,10 @@ func main() {
 
 	fmt.Println("Found magnet link:", magnet)
 
-	bt, err := transmissionrpc.New("localhost", "admin", "admin", nil)
+	bt, err := transmissionrpc.New(opts.Host, opts.User, opts.Password, &transmissionrpc.AdvancedConfig{
+		HTTPS: opts.Secure,
+		Port:  opts.Port,
+	})
 	if err != nil {
 		log.Fatal(err)
 	}
