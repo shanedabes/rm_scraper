@@ -71,6 +71,13 @@ jobs:
             --tag ${IMAGE_ID}:${VERSION} \
             --file ./Dockerfile .
 
+      - name: Docker Hub Description
+        uses: peter-evans/dockerhub-description@v2
+        env:
+          DOCKERHUB_USERNAME: shanedabes
+          DOCKERHUB_PASSWORD: ${{ secrets.DOCKER_HUB_PASSWORD }}
+          DOCKERHUB_REPOSITORY: shanedabes/rm_scraper
+
   release:
     needs: test
 
