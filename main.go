@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/hekmon/transmissionrpc"
@@ -38,7 +39,7 @@ func main() {
 	_, err := flags.Parse(&opts)
 
 	if err != nil {
-		log.Fatal(err)
+		os.Exit(1)
 	}
 
 	res, err := http.Get("https://myrunningman.com/")
