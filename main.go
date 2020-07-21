@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/hekmon/transmissionrpc"
 )
 
 var (
@@ -44,5 +45,20 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Print(magnet + "\n")
+	fmt.Println("Found magnet link:", magnet)
+
+	bt, err := transmissionrpc.New("localhost", "admin", "admin", nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	torrent, err := bt.TorrentAdd(&transmissionrpc.TorrentAddPayload{
+		Filename: &magnet,
+	})
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("Added file to transmission:", *torrent.Name)
 }
